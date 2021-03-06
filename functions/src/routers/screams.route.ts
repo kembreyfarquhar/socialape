@@ -1,6 +1,7 @@
 import * as express from 'express';
 import { db, screamCollection } from '../app';
 import { validateScream } from '../middleware/screams.middleware';
+import { authorization } from '../middleware/authorization.middleware';
 
 const screamsRouter = express.Router();
 
@@ -9,7 +10,7 @@ const screamsRouter = express.Router();
  * @apiGroup Scream
  *
  * @apiSuccess (200) {FirebaseFirestore.DocumentData[]}
- * @apiError (500) {error string}
+ * @apiError (500) {error code string}
  */
 screamsRouter.get('/', async (_, res) => {
 	try {
@@ -23,7 +24,7 @@ screamsRouter.get('/', async (_, res) => {
 		});
 		res.json(screams);
 	} catch (err) {
-		res.status(500).json({ error: err.toString() });
+		res.status(500).json({ error: err.code });
 	}
 });
 
@@ -32,19 +33,19 @@ screamsRouter.get('/', async (_, res) => {
  * @apiGroup Scream
  *
  * @apiSuccess (201) {success message containing doc.id}
- * @apiError (500) {error string}
+ * @apiError (500) {error code string}
  */
-screamsRouter.post('/', validateScream, async (req, res) => {
+screamsRouter.post('/', validateScream, authorization, async (req, res) => {
 	try {
 		const newScream: Scream = {
 			body: req.body.body,
-			userHandle: req.body.userHandle,
+			userHandle: req.user.handle,
 			createdAt: new Date().toISOString(),
 		};
 		const doc = await db.collection(screamCollection).add(newScream);
 		res.status(201).json(`Document "${doc.id}" created.`);
 	} catch (err) {
-		res.status(500).json({ error: err.toString() });
+		res.status(500).json({ error: err.code });
 	}
 });
 
