@@ -8,9 +8,9 @@ export const validateNewUser: RequestHandler = (req, res, next) => {
 	let errors: Record<string, string> = {};
 
 	if (!keys.length) {
-		res.status(400).json('Must contain a json body');
+		res.status(400).json({ body: 'Must contain a json body' });
 	} else if (!email || !password || !confirmPassword || !handle) {
-		res.status(400).json('Must contain email, password, confirmPassword, and handle');
+		res.status(400).json({ body: 'Must contain email, password, confirmPassword, and handle' });
 	} else {
 		if (isEmpty(email)) errors.email = 'Must not be empty';
 		if (isEmpty(handle)) errors.handle = 'Must not be empty';
@@ -28,9 +28,9 @@ export const validateUserLogin: RequestHandler = (req, res, next) => {
 	let errors: Record<string, string> = {};
 
 	if (!keys.length) {
-		res.status(400).json('Must contain a json body');
+		res.status(400).json({ body: 'Must contain a json body' });
 	} else if (!email || !password) {
-		res.status(400).json('Must contain email and password');
+		res.status(400).json({ body: 'Must contain email and password' });
 	} else {
 		if (isEmpty(email)) errors.email = 'Must not be empty';
 		if (isEmpty(password)) errors.password = 'Must not be empty';

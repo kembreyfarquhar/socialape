@@ -5,12 +5,29 @@ import { validateNewUser, validateUserLogin } from '../middleware/users.middlewa
 const authRouter = express.Router();
 
 /**
- * @api {post} /auth/register Register new user
- * @apiGroup User
+ * @api {post} /auth/register Register new user.
+ * @apiName RegusterUser
+ * @apiGroup Users
  *
- * @apiSuccess (201) {token string}
- * @apiError (400) {errors || email/handle already in use}
- * @apiError (500) {error code string}
+ * @apiParam {String} email Mandatory unique email.
+ * @apiParam {String} password Mandatory password.
+ * @apiParam {String} confirmPassword Mandatory field to match password.
+ * @apiParam {String} handle Mandatory unique user handle.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "email": "myexample@email.com",
+ *          "password": "verysecurepassword",
+ *          "confirmPassword": "verysecurepassword",
+ *          "handle": "myhandle"
+ *      }
+ *
+ * @apiUse AuthSuccess
+ *
+ * @apiUse BodyValidationError
+ * @apiError (400) {String} handle This handle is already in use.
+ * @apiError (400) {String} email This email is already in use.
+ * @apiUse InternalServerError
  */
 authRouter.post('/register', validateNewUser, async (req, res) => {
 	try {
@@ -28,7 +45,7 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
 		const existingUser = await db.doc(`/users/${newUser.handle}`).get();
 		// IF USER EXISTS, STATUS 400
 		if (existingUser.exists) {
-			res.status(400).json({ handle: 'This handle is already taken' });
+			res.status(400).json({ handle: 'This handle is already in use' });
 		} else {
 			// ADD USER TO AUTHENTICATION
 			const data = await firebase.default
@@ -53,17 +70,29 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
 	} catch (err) {
 		if (err.code === 'auth/email-already-in-use') {
 			res.status(400).json({ email: 'Email is already in use' });
-		} else res.status(500).json({ error: err.code });
+		} else res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 
 /**
- * @api {post} /auth/login Login existing user
- * @apiGroup User
+ * @api {post} /auth/login Login existing user.
+ * @apiName LoginUser
+ * @apiGroup Users
  *
- * @apiSuccess (200) {token string}
- * @apiError (400) {errors || wrong credentials}
- * @apiError (500) {error code string}
+ * @apiParam {String} email Mandatory email.
+ * @apiParam {String} password Mandatory password.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "email": "myexample@email.com",
+ *          "password": "verysecurepassword"
+ *      }
+ *
+ * @apiUse AuthSuccess
+ *
+ * @apiUse BodyValidationError
+ * @apiError (400) {String} general Wrong credentials.
+ * @apiUse InternalServerError
  */
 authRouter.post('/login', validateUserLogin, async (req, res) => {
 	try {
@@ -80,7 +109,7 @@ authRouter.post('/login', validateUserLogin, async (req, res) => {
 	} catch (err) {
 		if (err.code === 'auth/wrong-password') {
 			res.status(400).json({ general: 'Wrong credentials' });
-		} else res.status(500).json({ error: err.code });
+		} else res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 

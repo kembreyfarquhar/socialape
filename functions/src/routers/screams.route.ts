@@ -7,10 +7,24 @@ const screamsRouter = express.Router();
 
 /**
  * @api {get} /screams Get all Scream Documents
- * @apiGroup Scream
+ * @apiName GetAllScreams
+ * @apiGroup Screams
  *
- * @apiSuccess (200) {FirebaseFirestore.DocumentData[]}
- * @apiError (500) {error code string}
+ * @apiSuccess (200) {String} id ID of the document
+ * @apiSuccess (200) {String} createdAt Timestamp string.
+ * @apiSuccess (200) {String} body Scream body/content.
+ * @apiSuccess (200) {String} userHandle Handle for scream's creator.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ *      {
+ *          "id": "KJHndjhDKJhdnDHjd",
+ *          "createdAt": "2021-03-06T16:04:36.298Z",
+ *          "body": "This is a scream!",
+ *          "userHandle": "exampleuser"
+ *      }
+ *
+ * @apiUse InternalServerError
+ *
  */
 screamsRouter.get('/', async (_, res) => {
 	try {
@@ -24,16 +38,28 @@ screamsRouter.get('/', async (_, res) => {
 		});
 		res.json(screams);
 	} catch (err) {
-		res.status(500).json({ error: err.code });
+		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 
 /**
  * @api {post} /screams Create a new Scream Document
- * @apiGroup Scream
+ * @apiName PostScream
+ * @apiGroup Screams
  *
- * @apiSuccess (201) {success message containing doc.id}
- * @apiError (500) {error code string}
+ * @apiUse AuthHeader
+ *
+ * @apiParam {String} body Mandatory scream body/content.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "body": "This is my scream!"
+ *      }
+ *
+ * @apiSuccess (201) {String} message Document <code>doc.id</code> created.
+ *
+ * @apiUse BodyValidationError
+ * @apiUse InternalServerError
  */
 screamsRouter.post('/', validateScream, authorization, async (req, res) => {
 	try {
@@ -43,9 +69,9 @@ screamsRouter.post('/', validateScream, authorization, async (req, res) => {
 			createdAt: new Date().toISOString(),
 		};
 		const doc = await db.collection(screamCollection).add(newScream);
-		res.status(201).json(`Document "${doc.id}" created.`);
+		res.status(201).json({ message: `Document "${doc.id}" created.` });
 	} catch (err) {
-		res.status(500).json({ error: err.code });
+		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 
