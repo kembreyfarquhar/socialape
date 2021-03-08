@@ -1,8 +1,8 @@
 /**
  * @apiDefine InternalServerError
  *
- * @apiError (500) {String} error Error code associated with failure.
- * @apiError (500) {String} message Error string for detailed message.
+ * @apiError (500 INTERNAL SERVER ERROR) {String} error Error code associated with failure.
+ * @apiError (500 INTERNAL SERVER ERROR) {String} message Error string for detailed message.
  *
  * @apiErrorExample {json} Error-Response:
  *      HTTP/1.1 500 Internal Server Error
@@ -15,7 +15,7 @@
 /**
  * @apiDefine BodyValidationError
  *
- * @apiError (400) {String} body Invalid request body.
+ * @apiError (400 BAD REQUEST) {String} body Invalid request body.
  *
  * @apiErrorExample {json} Error-Response:
  *      HTTP/1.1 400 Bad Request
@@ -27,7 +27,7 @@
 /**
  * @apiDefine AuthSuccess
  *
- * @apiSuccess (2xx) {String} token Firebase authorization token.
+ * @apiSuccess (2xx SUCCESS) {String} token Firebase authorization token.
  *
  * @apiSuccessExample {json} Success-Response:
  *      {
