@@ -6,6 +6,7 @@ declare global {
 		export interface Request {
 			user: admin.auth.DecodedIdToken;
 			rawBody: any;
+			userDetails: UserDetails;
 		}
 	}
 }
