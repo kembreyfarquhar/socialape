@@ -4,6 +4,9 @@ import { validateNewUser, validateUserLogin } from '../middleware/users.middlewa
 
 const authRouter = express.Router();
 
+//                                |*| REGISTER USER |*|
+// ====================================================================================|
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 /**
  * @api {post} /auth/register Register new user.
  * @apiName RegusterUser
@@ -25,8 +28,8 @@ const authRouter = express.Router();
  * @apiUse AuthSuccess
  *
  * @apiUse BodyValidationError
- * @apiError (400) {String} handle This handle is already in use.
- * @apiError (400) {String} email This email is already in use.
+ * @apiError (400 BAD REQUEST) {String} handle This handle is already in use.
+ * @apiError (400 BAD REQUEST) {String} email This email is already in use.
  * @apiUse InternalServerError
  */
 authRouter.post('/register', validateNewUser, async (req, res) => {
@@ -74,6 +77,9 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
 	}
 });
 
+//                                  |*| LOGIN USER |*|
+// ====================================================================================|
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 /**
  * @api {post} /auth/login Login existing user.
  * @apiName LoginUser
@@ -91,7 +97,7 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
  * @apiUse AuthSuccess
  *
  * @apiUse BodyValidationError
- * @apiError (400) {String} general Wrong credentials.
+ * @apiError (400 BAD REQUEST) {String} general Wrong credentials.
  * @apiUse InternalServerError
  */
 authRouter.post('/login', validateUserLogin, async (req, res) => {
