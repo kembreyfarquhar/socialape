@@ -3,11 +3,15 @@ import * as BusBoy from 'busboy';
 import * as path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
-import { db, admin, firebaseConfig } from '../app';
+import { db, admin, firebaseConfig, likesCollection } from '../app';
 import { authorization } from '../middleware/authorization.middleware';
+import { validateUserDetails } from '../middleware/users.middleware';
 
 const usersRouter = express.Router();
 
+//                                |*| UPDATE IMAGE |*|
+// ====================================================================================|
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 /**
  * @api {post} /users/image Update user image.
  * @apiName UpdateImage
@@ -17,9 +21,9 @@ const usersRouter = express.Router();
  *
  * @apiParam {FormData} image Mandatory image filepath.
  *
- * @apiSuccess (200) {String} message Image uploaded.
+ * @apiSuccess (200 OK) {String} message Image uploaded.
  *
- * @apiError (400) {String} error Wrong file type submitted.
+ * @apiError (400 BAD REQUEST) {String} error Wrong file type submitted.
  * @apiUse InternalServerError
  */
 usersRouter.post('/image', authorization, (req, res) => {
@@ -66,6 +70,114 @@ usersRouter.post('/image', authorization, (req, res) => {
 
 	// END
 	busboy.end(req.rawBody);
+});
+
+//                                |*| UPDATE USER DETAILS |*|
+// ====================================================================================|
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+/**
+ * @api {post} /users/details Update user details.
+ * @apiName UpdateUserDetails
+ * @apiGroup Users
+ *
+ * @apiUse AuthHeader
+ *
+ * @apiParam {String} bio Optional user bio.
+ * @apiParam {String} website Optional user website.
+ * @apiParam {String} location Optional user location.
+ *
+ * @apiParamExample {json} Request-Example:
+ *      {
+ *          "bio": "Hello, nice to meet you, I'm user.",
+ *          "website": "https://user.com",
+ *          "location": "St. Louis, MO, USA"
+ *      }
+ *
+ * @apiParamExample {json} Request-Example:
+ * 		{
+ * 			"bio": "",
+ * 			"website": "user.com"
+ * 		}
+ *
+ * @apiUse BodyValidationError
+ * @apiUse InternalServerError
+ */
+usersRouter.post('/details', authorization, validateUserDetails, async (req, res) => {
+	const userDetails = req.userDetails;
+
+	try {
+		await db.doc(`/users/${req.user.handle}`).update(userDetails);
+		res.json({ message: 'User details updated' });
+	} catch (err) {
+		res.status(500).json({ error: err.code, message: err.toString() });
+	}
+});
+
+//                                  |*| GET USER INFO |*|
+// ====================================================================================|
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+/**
+ * @api {get} /users/userinfo Get all user info.
+ * @apiName GetUserInfo
+ * @apiGroup Users
+ *
+ * @apiUse AuthHeader
+ *
+ * @apiSuccess (200 OK) {Object} credentials
+ * @apiSuccess (200 OK) {String} credentials.userId ID of user.
+ * @apiSuccess (200 OK) {String} credentials.email User email.
+ * @apiSuccess (200 OK) {String} credentials.handle User handle.
+ * @apiSuccess (200 OK) {String} credentials.createdAt ISO Timestamp of user creation.
+ * @apiSuccess (200 OK) {String} credentials.imageUrl URL to user's profile image.
+ * @apiSuccess (200 OK) {String} credentials.bio User bio.
+ * @apiSuccess (200 OK) {String} credentials.website User's website.
+ * @apiSuccess (200 OK) {String} credentials.location User's location.
+ * @apiSuccess (200 OK) {Object[]} likes List of all screams user has liked.
+ * @apiSuccess (200 OK) {String} likes.userHandle Handle of user.
+ * @apiSuccess (200 OK) {String} likes.screamId ID of scream that was liked.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * 		{
+ * 			"credentials": {
+ *   			"bio": "Hello, nice to meet you!",
+ *   			"userId": "AM89AAaud5e0ii2oijfZoPRC2",
+ *   			"handle": "user",
+ *   			"website": "https://user.com",
+ *   			"email": "user@gmail.com",
+ *   			"createdAt": "2021-03-07T23:40:05.580Z",
+ *   			"imageUrl": "https://firebasestorage.googleapis.com/v0/b/appname.appspot.com/o/02375.jpg?alt=media"
+ * 			},
+ * 			"likes": [
+ * 				{
+ * 					"userHandle": "user",
+ * 					"screamId": "02094j0ifjoj0idjfosj02e9j"
+ * 				}
+ * 			]
+ *		}
+ *
+ * @apiError (404 NOT FOUND) {String} error User not found.
+ * @apiUse InternalServerError
+ */
+usersRouter.get('/userinfo', authorization, async (req, res) => {
+	const userData: UserData = {};
+	try {
+		const doc = await db.doc(`/users/${req.user.handle}`).get();
+		if (!doc.exists) {
+			res.status(404).json({ error: 'User not found' });
+		} else {
+			userData.credentials = doc.data();
+		}
+		const data = await db
+			.collection(likesCollection)
+			.where('userHandle', '==', req.user.handle)
+			.get();
+		const likes: FirebaseFirestore.DocumentData[] = [];
+		data.forEach(document => likes.push(document.data()));
+		userData.likes = likes;
+		res.json(userData);
+	} catch (err) {
+		res.status(500).json({ error: err.code, message: err.toString() });
+	}
 });
 
 export { usersRouter };
