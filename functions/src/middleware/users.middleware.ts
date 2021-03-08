@@ -38,3 +38,30 @@ export const validateUserLogin: RequestHandler = (req, res, next) => {
 		else next();
 	}
 };
+
+export const validateUserDetails: RequestHandler = (req, res, next) => {
+	let userDetails: UserDetails = {};
+	const { bio, website, location } = req.body;
+	const keys = Object.keys(req.body);
+
+	if (!keys.length) {
+		res.status(400).json({ body: 'Must contain a json body' });
+	} else if (!bio && !website && !location) {
+		res.status(400).json({ body: 'Must contain a bio, website, or location' });
+	} else {
+		if (bio && !isEmpty(bio)) userDetails.bio = bio;
+		if (website && !isEmpty(website)) {
+			if (website.trim().substring(0, 4) !== 'http') {
+				userDetails.website = `http://${website.trim()}`;
+			} else userDetails.website = website;
+		}
+		if (location && !isEmpty(location)) userDetails.location = location;
+
+		if (Object.keys(userDetails).length > 0) {
+			req.userDetails = userDetails;
+			next();
+		} else {
+			res.status(400).json({ body: 'Invalid request body' });
+		}
+	}
+};
