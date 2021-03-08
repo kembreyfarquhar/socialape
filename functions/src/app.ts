@@ -39,6 +39,8 @@ export { firebase };
 export const db = admin.firestore();
 export const screamCollection = 'screams';
 export const usersCollection = 'users';
+export const likesCollection = 'likes';
+export const commentsCollection = 'comments';
 
 // ========= USE ROUTERS ========== //
 app.use('/screams', screamsRouter);
