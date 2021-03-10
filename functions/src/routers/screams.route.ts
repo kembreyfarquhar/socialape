@@ -118,6 +118,8 @@ screamsRouter.get('/', async (_, res) => {
  */
 screamsRouter.get('/:screamId', isExistingScream, async (req, res) => {
 	const { screamDoc } = req;
+	const screamId = req.params.screamId;
+
 	try {
 		const commentsData = await db
 			.collection(commentsCollection)
@@ -128,7 +130,6 @@ screamsRouter.get('/:screamId', isExistingScream, async (req, res) => {
 		const comments: ScreamComment[] = [];
 		commentsData.forEach(doc => comments.push(doc.data() as ScreamComment));
 		const { userHandle, body, createdAt } = screamDoc.data() as Scream;
-		const screamId = screamDoc.id;
 		const screamData: ScreamData = { userHandle, body, createdAt, screamId, comments };
 		res.json(screamData);
 	} catch (err) {
@@ -272,9 +273,10 @@ screamsRouter.post(
  * 			"commentCount": 3
  * 		}
  *
- * @apiError (404 NOT FOUND) {String} error Scream not found
+ * @apiError (404 NOT FOUND) {String} error Scream not found.
  *
- * @apiUse BodyValidationError
+ * @apiError (400 BAD REQUEST) {String} error Scream already liked.
+ *
  * @apiUse InternalServerError
  */
 screamsRouter.post('/:screamId/like', authorization, isExistingScream, async (req, res) => {
@@ -308,10 +310,42 @@ screamsRouter.post('/:screamId/like', authorization, isExistingScream, async (re
 //                                 |*| UNLIKE A SCREAM |*|
 // ====================================================================================|
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
-// TODO: apidocs
+/**
+ * @api {DELETE} /screams/:screamId/unlike Delete a like from a Scream
+ * @apiName DeleteScreamLike
+ * @apiGroup Screams
+ *
+ * @apiUse AuthHeader
+ *
+ * @apiParam (Query String Param) {String} screamId Scream's unique ID.
+ *
+ * @apiSuccess (200 OK) {String} userHandle User's unique handle.
+ * @apiSuccess (200 OK) {String} screamId Scream's unique ID.
+ * @apiSuccess (200 OK) {String} createdAt ISO String of like's creation.
+ * @apiSuccess (200 OK) {String} body Body/content of scream.
+ * @apiSuccess (200 OK) {String} userImage User's profile image URL.
+ * @apiSuccess (200 OK) {Number} likeCount Number of likes on scream.
+ * @apiSuccess (200 OK) {Number} commentCount Number of comments on scream.
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * 		{
+ * 			"userHandle": "user",
+ * 			"screamId": "DThsMg42rhXvw9i5WJvj",
+ * 			"createdAt": "2021-03-09T20:58:04.154Z",
+ * 			"body": "This is my super cool comment!",
+ * 			"userImage": "https://firebasestorage.googleapis.com/v0/b/appname.appspot.com/o/7273339.jpg?alt=media",
+ * 			"likeCount": 23,
+ * 			"commentCount": 3
+ * 		}
+ *
+ * @apiError (404 NOT FOUND) {String} error Scream not found.
+ *
+ * @apiError (400 BAD REQUEST) {String} error Scream not liked.
+ *
+ * @apiUse InternalServerError
+ */
 screamsRouter.delete('/:screamId/unlike', authorization, isExistingScream, async (req, res) => {
 	const screamId = req.params.screamId;
-	const userHandle = req.user.handle;
 	const { screamDoc } = req;
 
 	try {
@@ -319,7 +353,7 @@ screamsRouter.delete('/:screamId/unlike', authorization, isExistingScream, async
 		const screamData: Scream = screamDoc.data() as Scream;
 		const likeDoc = await db
 			.collection(likesCollection)
-			.where('userHandle', '==', userHandle)
+			.where('userHandle', '==', req.user.handle)
 			.where('screamId', '==', screamId)
 			.limit(1)
 			.get();

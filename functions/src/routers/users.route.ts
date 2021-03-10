@@ -79,12 +79,12 @@ usersRouter.get('/userinfo', authorization, async (req, res) => {
 	}
 });
 
-//                                |*| UPDATE IMAGE |*|
+//                                |*| POST PROFILE IMAGE |*|
 // ====================================================================================|
 // vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 /**
- * @api {post} /users/image Update user image.
- * @apiName UpdateImage
+ * @api {post} /users/image Post user profile image.
+ * @apiName PostUserImage
  * @apiGroup Users
  *
  * @apiUse AuthHeader
