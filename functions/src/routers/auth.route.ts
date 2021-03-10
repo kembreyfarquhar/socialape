@@ -1,6 +1,8 @@
 import * as express from 'express';
 import { firebase, db, firebaseConfig } from '../app';
 import { validateNewUser, validateUserLogin } from '../middleware/users.middleware';
+// eslint-disable-next-line no-unused-vars
+import { User } from '../types/user.type';
 
 const authRouter = express.Router();
 
@@ -34,14 +36,7 @@ const authRouter = express.Router();
  */
 authRouter.post('/register', validateNewUser, async (req, res) => {
 	try {
-		// GATHER INFORMATION FROM REQ.BODY
-		const newUser: User = {
-			email: req.body.email,
-			password: req.body.password,
-			confirmPassword: req.body.confirmPassword,
-			handle: req.body.handle,
-		};
-
+		const newUser = req.newUser;
 		const noImg = 'no-img.png';
 
 		// CHECK FOR AN EXISTING USER W/ SAME HANDLE
@@ -57,12 +52,13 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
 			// GATHER INFORMATION FROM CREATED USER
 			const token = await data.user?.getIdToken();
 			const userId = data.user?.uid;
-			delete newUser.password;
-			delete newUser.confirmPassword;
+			const userToInsert = { ...(newUser as Record<string, any>) };
+			delete userToInsert.password;
+			delete userToInsert.confirmPassword;
 			// CONSTRUCT OBJECT TO INSERT INTO USERS COLLECTION
 			const userCredentials = {
 				userId,
-				...newUser,
+				...userToInsert,
 				createdAt: new Date().toISOString(),
 				imageUrl: `https://firebasestorage.googleapis.com/v0/b/${firebaseConfig.storageBucket}/o/${noImg}?alt=media`,
 			};

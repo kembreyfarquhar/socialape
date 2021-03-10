@@ -27,6 +27,7 @@ export const authorization: RequestHandler = async (req, res, next) => {
 			.get();
 		// SET THE USER HANDLE INSIDE REQ.USER
 		req.user.handle = data.docs[0].data().handle;
+		req.user.imageUrl = data.docs[0].data().imageUrl;
 		next();
 	} catch (err) {
 		// SEND BACK ERROR FOR FAILED AUTHORIZATION

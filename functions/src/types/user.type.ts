@@ -1,5 +1,9 @@
-interface User {
+// eslint-disable-next-line no-unused-vars
+import { ScreamLike } from './like.type';
+
+export type User = {
 	email: string;
+	createdAt?: string;
 	password?: string;
 	confirmPassword?: string;
 	handle: string;
@@ -7,15 +11,15 @@ interface User {
 	bio?: string;
 	website?: string;
 	location?: string;
-}
+};
 
-interface UserDetails {
+export type UserDetails = {
 	bio?: string;
 	website?: string;
 	location?: string;
-}
+};
 
-interface UserData {
-	credentials?: FirebaseFirestore.DocumentData | undefined;
-	likes?: FirebaseFirestore.DocumentData[];
-}
+export type UserData = {
+	credentials: User;
+	likes?: ScreamLike[];
+};

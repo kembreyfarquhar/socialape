@@ -4,6 +4,8 @@ import { admin } from '../app';
 import { ScreamComment } from './comment.type';
 // eslint-disable-next-line no-unused-vars
 import { Scream } from './scream.type';
+// eslint-disable-next-line no-unused-vars
+import { User, UserDetails } from './user.type';
 
 declare global {
 	namespace Express {
@@ -13,6 +15,8 @@ declare global {
 			userDetails: UserDetails;
 			comment: ScreamComment;
 			scream: Scream;
+			screamDoc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>;
+			newUser: User;
 		}
 	}
 }

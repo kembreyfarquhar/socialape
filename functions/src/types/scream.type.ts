@@ -2,8 +2,10 @@
 import { ScreamComment } from './comment.type';
 
 export type Scream = {
+	id?: string;
 	body: string;
 	userHandle: string;
+	userImage: string;
 	createdAt: string;
 	commentCount?: number;
 	likeCount?: number;
