@@ -3,6 +3,7 @@ import { ScreamComment } from './comment.type';
 
 export type Scream = {
 	id?: string;
+	screamId?: string;
 	body: string;
 	userHandle: string;
 	userImage: string;

@@ -1,5 +1,9 @@
 // eslint-disable-next-line no-unused-vars
 import { ScreamLike } from './like.type';
+// eslint-disable-next-line no-unused-vars
+import { UserNotification } from './notification.type';
+// eslint-disable-next-line no-unused-vars
+import { Scream } from './scream.type';
 
 export type User = {
 	email: string;
@@ -20,6 +24,12 @@ export type UserDetails = {
 };
 
 export type UserData = {
+	user: User;
+	screams?: Scream[];
+};
+
+export type AuthenticatedUserData = {
 	credentials: User;
 	likes?: ScreamLike[];
+	notifications?: UserNotification[];
 };

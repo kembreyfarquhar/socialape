@@ -93,7 +93,7 @@ authRouter.post('/register', validateNewUser, async (req, res) => {
  * @apiUse AuthSuccess
  *
  * @apiUse BodyValidationError
- * @apiError (400 BAD REQUEST) {String} general Wrong credentials.
+ * @apiError (403 FORBIDDEN) {String} general Wrong credentials.
  * @apiUse InternalServerError
  */
 authRouter.post('/login', validateUserLogin, async (req, res) => {
@@ -110,7 +110,7 @@ authRouter.post('/login', validateUserLogin, async (req, res) => {
 		res.json({ token });
 	} catch (err) {
 		if (err.code === 'auth/wrong-password') {
-			res.status(400).json({ general: 'Wrong credentials' });
+			res.status(403).json({ general: 'Wrong credentials' });
 		} else res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });

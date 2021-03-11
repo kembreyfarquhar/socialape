@@ -56,21 +56,15 @@ const screamsRouter = express.Router();
  */
 screamsRouter.get('/', async (_, res) => {
 	try {
-		const data = await db.collection(screamCollection).orderBy('createdAt', 'desc').get();
+		const screamDocs = await db.collection(screamCollection).orderBy('createdAt', 'desc').get();
 		const screams: Scream[] = [];
-		data.forEach(doc => {
-			const {
-				body,
-				userHandle,
-				createdAt,
-				userImage,
-				likeCount,
-				commentCount,
-			} = doc.data() as Scream;
-			screams.push({ id: doc.id, body, userHandle, createdAt, userImage, likeCount, commentCount });
+		screamDocs.forEach(screamDoc => {
+			const screamData = screamDoc.data() as Scream;
+			screams.push({ id: screamDoc.id, ...screamData });
 		});
 		res.json(screams);
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
@@ -121,18 +115,19 @@ screamsRouter.get('/:screamId', isExistingScream, async (req, res) => {
 	const screamId = req.params.screamId;
 
 	try {
-		const commentsData = await db
+		const commentsDoc = await db
 			.collection(commentsCollection)
 			.orderBy('createdAt', 'desc')
 			.where('screamId', '==', req.params.screamId)
 			.get();
 
 		const comments: ScreamComment[] = [];
-		commentsData.forEach(doc => comments.push(doc.data() as ScreamComment));
+		commentsDoc.forEach(commentDoc => comments.push(commentDoc.data() as ScreamComment));
 		const { userHandle, body, createdAt } = screamDoc.data() as Scream;
 		const screamData: ScreamData = { userHandle, body, createdAt, screamId, comments };
 		res.json(screamData);
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
@@ -180,9 +175,10 @@ screamsRouter.post('/', authorization, validateScream, async (req, res) => {
 	const newScream = req.scream;
 
 	try {
-		const doc = await db.collection(screamCollection).add(newScream);
-		res.status(201).json({ ...newScream, screamId: doc.id });
+		const screamDoc = await db.collection(screamCollection).add(newScream);
+		res.status(201).json({ ...newScream, screamId: screamDoc.id });
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
@@ -211,6 +207,8 @@ screamsRouter.post('/', authorization, validateScream, async (req, res) => {
  * @apiSuccess (201 CREATED) {String} createdAt ISO String of comment's creation.
  * @apiSuccess (201 CREATED) {String} body Body/content of comment.
  * @apiSuccess (201 CREATED) {String} userImage User's profile image URL.
+ * @apiSuccess (201 CREATED) {Number} likeCount Number of likes scream has.
+ * @apiSuccess (201 CREATED) {Number} commentCount Number of comments a scream has.
  *
  * @apiSuccessExample {json} Success-Response:
  * 		{
@@ -218,7 +216,9 @@ screamsRouter.post('/', authorization, validateScream, async (req, res) => {
  * 			"screamId": "DThsMg42rhXvw9i5WJvj",
  * 			"createdAt": "2021-03-09T20:58:04.154Z",
  * 			"body": "This is my super cool comment!",
- * 			"userImage": "https://firebasestorage.googleapis.com/v0/b/appname.appspot.com/o/7273339.jpg?alt=media"
+ * 			"userImage": "https://firebasestorage.googleapis.com/v0/b/appname.appspot.com/o/7273339.jpg?alt=media",
+ * 			"likeCount": 0,
+ * 			"commentCount": 0
  * 		}
  *
  * @apiError (404 NOT FOUND) {String} error Scream not found
@@ -233,10 +233,16 @@ screamsRouter.post(
 	isExistingScream,
 	async (req, res) => {
 		const newComment = req.comment;
+		const { screamDoc } = req;
+		const data = screamDoc.data() as Scream;
 		try {
+			await screamDoc.ref.update({ commentCount: (data.commentCount as number) + 1 });
 			await db.collection(commentsCollection).add(newComment);
-			res.status(201).json(newComment);
+			res
+				.status(201)
+				.json({ ...newComment, commentCount: data.commentCount, likeCount: data.likeCount });
 		} catch (err) {
+			console.error(err);
 			res.status(500).json({ error: err.code, message: err.toString() });
 		}
 	}
@@ -303,13 +309,14 @@ screamsRouter.post('/:screamId/like', authorization, isExistingScream, async (re
 			res.status(400).json({ error: 'Scream already liked' });
 		}
 	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 
 //                                 |*| UNLIKE A SCREAM |*|
 // ====================================================================================|
-// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
 /**
  * @api {DELETE} /screams/:screamId/unlike Delete a like from a Scream
  * @apiName DeleteScreamLike
@@ -367,8 +374,54 @@ screamsRouter.delete('/:screamId/unlike', authorization, isExistingScream, async
 			res.status(400).json({ error: 'Scream not liked' });
 		}
 	} catch (err) {
+		console.error(err);
+		res.status(500).json({ error: err.code, message: err.toString() });
+	}
+});
+
+//                                 |*| DELETE SCREAM |*|
+// ====================================================================================|
+//vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv|
+screamsRouter.delete('/:screamId', authorization, isExistingScream, async (req, res) => {
+	const { screamDoc } = req;
+	const data = screamDoc.data() as Scream;
+	try {
+		if (data.userHandle !== req.user.handle) {
+			res.status(403).json({ error: 'Unauthorized' });
+		} else {
+			const doc = db.doc(`/screams/${req.params.screamId}`);
+			await doc.delete();
+			res.json({ message: 'Scream deleted' });
+		}
+	} catch (err) {
+		console.error(err);
 		res.status(500).json({ error: err.code, message: err.toString() });
 	}
 });
 
 export { screamsRouter };
+
+/*
+			// CHECK IF THERE ARE LIKE DOCS ASSOCIATED WITH THIS SCREAM
+			const likeDocs = await db
+				.collection(likesCollection)
+				.where('screamId', '==', req.params.screamId)
+				.get();
+			// DELETE ANY LIKE DOCS FOUND
+			if (likeDocs.size > 0) {
+				likeDocs.forEach(async likeDoc => {
+					await likeDoc.ref.delete();
+				});
+			}
+			// CHECK IF THERE ARE COMMENT DOCS ASSOCIATED WITH SCREAM
+			const commentDocs = await db
+				.collection(commentsCollection)
+				.where('screamId', '==', req.params.screamId)
+				.get();
+			// DELETE ANY COMMENT DOCS FOUND
+			if (commentDocs.size > 0) {
+				commentDocs.forEach(async commentDoc => {
+					await commentDoc.ref.delete();
+				});
+			}
+*/

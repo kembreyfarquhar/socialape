@@ -36,16 +36,36 @@ app.use(cors({ origin: true }));
 // ======== EXPORT VALUES ========= //
 export { admin };
 export { firebase };
+export const region = 'us-central1';
 export const db = admin.firestore();
 export const screamCollection = 'screams';
 export const usersCollection = 'users';
 export const likesCollection = 'likes';
 export const commentsCollection = 'comments';
+export const notificationCollection = 'notifications';
 
-// ========= USE ROUTERS ========== //
-app.use('/screams', screamsRouter);
+// ========= ROUTERS ========== //
+// TOKEN = TOKEN AUTH REQUIRED
+
+// post('/auth/register') Register User
+// post('/auth/login') Login User
 app.use('/auth', authRouter);
+
+// get('/users/handle/:handle') Get Any User
+// get('/users/logged-in-user') TOKEN Get Logged-In User Info
+// post('/users/image') TOKEN Post User Image
+// put('/users/details') TOKEN Update/Add User Details
+// put('/users/mark-notification-read') TOKEN Mark Notifications Read
 app.use('/users', usersRouter);
+
+// get('/screams/') Get All Screams
+// get('/screams/:screamId') Get Scream By ID
+// post('/screams/') TOKEN Post New Scream
+// post('/screams/:screamId/comment') TOKEN Post Comment on Scream
+// post('/screams/:screamId/like') TOKEN Like a Scream
+// delete('/screams/:screamId/unlike') TOKEN Unlike a Scream
+// delete('/screams/:screamId') TOKEN Delete a Scream
+app.use('/screams', screamsRouter);
 
 // ===== EXPORT EXPRESS APP ======= //
 export { app };
