@@ -41,10 +41,5 @@
 		"prettier": "^2.2.1",
 		"typescript": "^3.8.0"
 	},
-	"private": true,
-	"apidoc": {
-		"title": "SocialApe API",
-		"url": "https://us-central1-socialape-e6983.cloudfunctions.net/api",
-		"sampleUrl": "https://us-central1-socialape-e6983.cloudfunctions.net/api"
-	}
+	"private": true
 }

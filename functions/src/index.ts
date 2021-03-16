@@ -15,9 +15,9 @@ import {
 // IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
 import { ScreamComment } from './types/comment';
-// // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
 import { UserNotification } from './types/notification';
-// // eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars
 import { Scream } from './types/scream';
 
 // ====== EXPORT FIREBASE FUNCTION RESPONSIBLE FOR RESTFUL API ======== //
