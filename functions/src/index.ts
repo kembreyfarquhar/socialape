@@ -1,19 +1,24 @@
+// IMPORT EXTERNAL PACKAGES
 import * as functions from 'firebase-functions';
+
+// IMPORT NEEDED VARIABLES FROM WITHIN REPO
 import {
 	app,
 	commentsCollection,
 	db,
 	likesCollection,
 	region,
-	screamCollection,
 	notificationCollection,
+	screamCollection,
 } from './app';
+
+// IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
-import { ScreamComment } from './types/comment.type';
-// eslint-disable-next-line no-unused-vars
-import { UserNotification } from './types/notification.type';
-// eslint-disable-next-line no-unused-vars
-import { Scream } from './types/scream.type';
+import { ScreamComment } from './types/comment';
+// // eslint-disable-next-line no-unused-vars
+import { UserNotification } from './types/notification';
+// // eslint-disable-next-line no-unused-vars
+import { Scream } from './types/scream';
 
 // ====== EXPORT FIREBASE FUNCTION RESPONSIBLE FOR RESTFUL API ======== //
 export const api = functions.region(region).https.onRequest(app);

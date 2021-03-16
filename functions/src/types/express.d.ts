@@ -1,11 +1,11 @@
 // eslint-disable-next-line no-unused-vars
 import { admin } from '../app';
 // eslint-disable-next-line no-unused-vars
-import { ScreamComment } from './comment.type';
+import { ScreamComment } from './comment';
 // eslint-disable-next-line no-unused-vars
-import { Scream } from './scream.type';
+import { DBScream } from './scream';
 // eslint-disable-next-line no-unused-vars
-import { User, UserDetails } from './user.type';
+import { UserDetails, UserLogin, UserRegister } from './user';
 
 declare global {
 	namespace Express {
@@ -14,9 +14,10 @@ declare global {
 			rawBody: any;
 			userDetails: UserDetails;
 			comment: ScreamComment;
-			scream: Scream;
+			scream: DBScream;
 			screamDoc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>;
-			newUser: User;
+			newUser: UserRegister;
+			userLogin: UserLogin;
 		}
 	}
 }

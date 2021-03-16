@@ -1,33 +1,43 @@
+// IMPORT EXTERNAL PACKAGES
+import * as Yup from 'yup';
+
+// IMPORT NEEDED VARIABLES FROM WITHIN REPO
+import { db } from '../app';
+import { ScreamErrors } from '../errorService/scream.error';
+import { ApiError } from '../errorService/apiError';
+
+// IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
 import { RequestHandler } from 'express';
 // eslint-disable-next-line no-unused-vars
-import { Scream } from '../types/scream.type';
-import { isEmpty } from '../utils/user.util';
-import { db } from '../app';
+import { DBScream } from '../types/scream';
 
-export const validateScream: RequestHandler = (req, res, next) => {
-	const { body } = req.body;
-	const keys = Object.keys(req.body);
+// SCREAM BODY SCHEMA
+function screamSchema() {
+	return Yup.object().shape({
+		body: Yup.string().strict(false).trim().required(),
+	});
+}
 
-	if (!keys.length) {
-		res.status(400).json({ body: 'Must contain a json body' });
-	} else if (!body) {
-		res.status(400).json({ body: 'Must include scream body' });
-	} else {
-		if (typeof body !== 'string') {
-			res.status(400).json({ body: 'Body must be a string' });
-		} else if (isEmpty(body)) {
-			res.status(400).json({ body: 'Must not be empty' });
-		} else {
-			const userHandle = req.user.handle,
-				createdAt = new Date().toISOString(),
-				userImage = req.user.imageUrl,
-				likeCount = 0,
-				commentCount = 0;
-			const newScream: Scream = { userHandle, createdAt, body, likeCount, commentCount, userImage };
-			req.scream = newScream;
-			next();
-		}
+// VALIDATE REQUEST BODY WITH SCREAM SCHEMA RULES
+// SEND VALIDATED VALUES VIA REQ.SCREAM OR CATCH ERR
+export const validateScream: RequestHandler = async (req, _res, next) => {
+	try {
+		const screamToCheck = { body: req.body.body };
+		// CAPTURE VALIDATED REQUEST BODY
+		const result = await screamSchema().validate(screamToCheck, { abortEarly: false });
+		const body = result.body,
+			commentCount = 0,
+			likeCount = 0,
+			createdAt = new Date().toISOString(),
+			userHandle = req.user.handle,
+			userImage = req.user.imageUrl;
+		// CONSTRUCT NEWSCREAM OBJECT THAT FITS NEWSCREAM TYPE TO SEND VIA REQ.SCREAM
+		const newScream: DBScream = { body, userHandle, userImage, createdAt, commentCount, likeCount };
+		req.scream = newScream;
+		next();
+	} catch (err) {
+		next(err);
 	}
 };
 
@@ -42,7 +52,7 @@ export const validateComment: RequestHandler = (req, res, next) => {
 	} else {
 		if (typeof body !== 'string') {
 			res.status(400).json({ body: 'Body must be a string' });
-		} else if (isEmpty(body)) {
+		} else if (!body) {
 			res.status(400).json({ body: 'Must not be empty' });
 		} else {
 			const userHandle = req.user.handle,
@@ -56,16 +66,21 @@ export const validateComment: RequestHandler = (req, res, next) => {
 	}
 };
 
-export const isExistingScream: RequestHandler = async (req, res, next) => {
+// CHECK IF SCREAM EXISTS MIDDLEWARE
+export const isExistingScream: RequestHandler = async (req, _res, next) => {
 	try {
+		// GRAB SCREAM DOC USING SCREAMID
 		const doc = await db.doc(`/screams/${req.params.screamId}`).get();
 		if (doc.exists) {
+			// SEND DOC VIA REQ.SCREAMDOC
 			req.screamDoc = doc;
 			next();
 		} else {
-			res.status(404).json({ error: 'Scream not found' });
+			// THROW ERROR TO BE HANDLED IF SCREAM DOESN'T EXIST
+			const error = ScreamErrors.SCREAM_DOESNT_EXIST;
+			next(new ApiError(error.code, error.message, error.type));
 		}
 	} catch (err) {
-		res.status(500).json({ error: err.code, message: err.toString() });
+		next(err);
 	}
 };

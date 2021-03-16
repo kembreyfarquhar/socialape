@@ -1,3 +1,4 @@
+// IMPORT EXTERNAL PACKAGES
 import * as admin from 'firebase-admin';
 import * as express from 'express';
 import * as cors from 'cors';
@@ -5,6 +6,7 @@ import * as firebase from 'firebase';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
+// === EXPORT FIREBASE CONFIG === //
 export const firebaseConfig = {
 	apiKey: process.env.apiKey,
 	authDomain: process.env.authDomain,
@@ -15,6 +17,9 @@ export const firebaseConfig = {
 	appId: process.env.appId,
 	measurementId: process.env.measurementId,
 };
+
+// ===== IMPORT ERROR HANDLERS ===== //
+import { errorHandler } from './middleware/errorHandlers.middleware';
 
 // ======== IMPORT ROUTERS ========= //
 import { screamsRouter } from './routers/screams.route';
@@ -66,6 +71,9 @@ app.use('/users', usersRouter);
 // delete('/screams/:screamId/unlike') TOKEN Unlike a Scream
 // delete('/screams/:screamId') TOKEN Delete a Scream
 app.use('/screams', screamsRouter);
+
+// ===== USE ERROR HANDLER ======= //
+app.use(errorHandler);
 
 // ===== EXPORT EXPRESS APP ======= //
 export { app };

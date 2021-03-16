@@ -1,11 +1,22 @@
+// IMPORT NEEDED VARIABLES FROM WITHIN REPO
+import { admin, db, usersCollection } from '../app';
+import { ApiError } from '../errorService/apiError';
+import { Errors } from '../errorService/auth.error';
+
+// IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
 import { RequestHandler } from 'express';
-import { admin, db, usersCollection } from '../app';
+// eslint-disable-next-line no-unused-vars
+import { ApiErrorType } from '../types/apiError';
 
-export const authorization: RequestHandler = async (req, res, next) => {
+// VALIDATE TOKEN MIDDLEWARE (FOR AUTHORIZATION ENDPOINTS)
+export const authorization: RequestHandler = async (req, _res, next) => {
 	// GRAB TOKEN FROM AUTHORIZATION HEADER
 	const token = req.headers.authorization;
-	if (!token) res.status(403).json({ error: 'Unauthorized, please provide a token' });
+	if (!token) {
+		const error: ApiErrorType = Errors.NO_TOKEN;
+		next(new ApiError(error.code, error.message, error.type, error.errors));
+	}
 
 	try {
 		// DECODE THE TOKEN
@@ -24,7 +35,11 @@ export const authorization: RequestHandler = async (req, res, next) => {
 		next();
 	} catch (err) {
 		// SEND BACK ERROR FOR FAILED AUTHORIZATION
-		console.error('Error while verifying token', err);
-		res.status(401).json(err);
+		const errors = [];
+		if (typeof err.code === 'string') errors.push(err.code);
+		else errors.push(err.message);
+
+		const error: ApiErrorType = Errors.TOKEN_VERIFY_FAILURE;
+		next(new ApiError(error.code, error.message, error.type, errors));
 	}
 };

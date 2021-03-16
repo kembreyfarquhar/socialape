@@ -1,84 +1,93 @@
+// IMPORT EXTERNAL PACKAGES
+import * as Yup from 'yup';
+
+// IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
 import { RequestHandler } from 'express';
-import { isEmpty, isEmail } from '../utils/user.util';
 // eslint-disable-next-line no-unused-vars
-import { User, UserDetails } from '../types/user.type';
+import { UserDetails, UserLogin, UserRegister } from '../types/user';
 
-export const validateNewUser: RequestHandler = (req, res, next) => {
-	const { email, password, confirmPassword, handle } = req.body;
-	const keys = Object.keys(req.body);
-	const errors: Record<string, any> = {};
+// USER REGISTRATION BODY SCHEMA
+function userRegistrationSchema() {
+	return Yup.object().shape({
+		email: Yup.string().strict(false).trim().email().required(),
+		handle: Yup.string().strict(false).trim().required(),
+		password: Yup.string()
+			.strict(false)
+			.trim()
+			.min(8, 'Password must be at least 8 characters long')
+			.required(),
+		confirmPassword: Yup.string()
+			.strict(false)
+			.trim()
+			.oneOf([Yup.ref('password'), null], 'Passwords must match')
+			.required(),
+	});
+}
 
-	if (!keys.length) {
-		res.status(400).json({ body: 'Must contain a json body' });
-	} else if (!email || !password || !confirmPassword || !handle) {
-		res.status(400).json({ body: 'Must contain email, password, confirmPassword, and handle' });
-	} else {
-		typeof email !== 'string' && (errors.email = 'Must be a string');
-		typeof handle !== 'string' && (errors.handle = 'Must be a string');
-		typeof password !== 'string' && (errors.password = 'Must be a string');
-
-		if (Object.keys(errors).length > 0) res.status(400).json(errors);
-
-		isEmpty(email) && (errors.email = 'Must not be empty');
-		isEmpty(handle) && (errors.handle = 'Must not be empty');
-		isEmpty(password) && (errors.password = 'Must not be empty');
-		!isEmail(email) && (errors.email = 'Must be a valid email address');
-		password !== confirmPassword && (errors.confirmPassword = 'Passwords must match');
-
-		if (Object.keys(errors).length > 0) res.status(400).json(errors);
-		else {
-			const newUser: User = { email, password, confirmPassword, handle };
-			req.newUser = newUser;
-			next();
-		}
+// VALIDATE REQUEST BODY WITH REGISTRATION SCHEMA RULES
+// SEND VALIDATED VALUES VIA REQ.NEWUSER OR CATCH ERR
+export const validateNewUser: RequestHandler = async (req, _res, next) => {
+	try {
+		const { email, password, confirmPassword, handle } = req.body;
+		const userToCheck = { email, password, confirmPassword, handle };
+		// CAPTURE VALIDATED REQUEST BODY
+		const result = await userRegistrationSchema().validate(userToCheck, { abortEarly: false });
+		// CONSTRUCT NEWUSER OBJECT THAT FITS USERREGISTER TYPE TO SEND VIA REQ.NEWUSER
+		const newUser: UserRegister = { ...result, createdAt: new Date().toISOString() };
+		req.newUser = newUser;
+		next();
+	} catch (err) {
+		next(err);
 	}
 };
 
-export const validateUserLogin: RequestHandler = (req, res, next) => {
-	const { email, password } = req.body;
-	const keys = Object.keys(req.body);
-	const errors: Record<string, string> = {};
+// USER LOGIN BODY SCHEMA
+function userLoginSchema() {
+	return Yup.object().shape({
+		email: Yup.string().strict(false).trim().email().required(),
+		password: Yup.string().strict(false).trim().required(),
+	});
+}
 
-	if (!keys.length) {
-		res.status(400).json({ body: 'Must contain a json body' });
-	} else if (!email || !password) {
-		res.status(400).json({ body: 'Must contain email and password' });
-	} else {
-		if (isEmpty(email)) errors.email = 'Must not be empty';
-		if (isEmpty(password)) errors.password = 'Must not be empty';
-		if (Object.keys(errors).length > 0) res.status(400).json(errors);
-		else next();
+// VALIDATE REQUEST BODY WITH LOGIN SCHEMA RULES
+// SEND VALIDATED VALUES VIA REQ.USERLOGIN OR CATCH ERR
+export const validateUserLogin: RequestHandler = async (req, _res, next) => {
+	try {
+		const { email, password } = req.body;
+		const userToCheck = { email, password };
+		// CAPTURE VALIDATED REQUEST BODY
+		const result = await userLoginSchema().validate(userToCheck, { abortEarly: false });
+		// ENSURE THAT RESULT FITS THE USERLOGIN TYPE TO SEND VIA REQ.USERLOGIN
+		const userLogin: UserLogin = result;
+		req.userLogin = userLogin;
+		next();
+	} catch (err) {
+		next(err);
 	}
 };
 
-export const validateUserDetails: RequestHandler = (req, res, next) => {
-	const userDetails: UserDetails = {};
-	const { bio, website, location } = req.body;
-	const keys = Object.keys(req.body);
+// USER DETAILS BODY SCHEMA
+function userDetailsSchema() {
+	return Yup.object().shape({
+		bio: Yup.string().strict(false).trim().notRequired().default(''),
+		website: Yup.string().strict(false).trim().url().notRequired().default(''),
+		location: Yup.string().strict(false).trim().notRequired().default(''),
+	});
+}
 
-	if (!keys.length) {
-		res.status(400).json({ body: 'Must contain a json body' });
-	} else if (!bio && !website && !location) {
-		res.status(400).json({ body: 'Must contain a bio, website, or location' });
-	} else {
-		if (bio && !isEmpty(bio)) userDetails.bio = bio;
-		if (website && !isEmpty(website)) {
-			if (typeof website !== 'string') {
-				res.status(400).json({ website: 'Must be a string' });
-			} else if (!website.includes('.')) {
-				res.status(400).json({ website: 'Must be a valid URL' });
-			} else if (website.trim().substring(0, 4) !== 'http') {
-				userDetails.website = `http://${website.trim()}`;
-			} else userDetails.website = website;
-		}
-		if (location && !isEmpty(location)) userDetails.location = location;
-
-		if (Object.keys(userDetails).length > 0) {
-			req.userDetails = userDetails;
-			next();
-		} else {
-			res.status(400).json({ body: 'Invalid request body' });
-		}
+// VALIDATE REQUEST BODY WITH USER DETAILS SCHEMA RULES
+export const validateUserDetails: RequestHandler = async (req, _res, next) => {
+	try {
+		const { bio, website, location } = req.body;
+		const userDetailsToCheck = { bio, website, location };
+		// CAPTURE VALIDATED REQUEST BODY
+		const result = await userDetailsSchema().validate(userDetailsToCheck, { abortEarly: false });
+		// ENSURE THAT RESULT FITS THE USERDETAILS TYPE TO SEND VIA REQ.USERDETAILS
+		const userDetails: UserDetails = result;
+		req.userDetails = userDetails;
+		next();
+	} catch (err) {
+		next(err);
 	}
 };
