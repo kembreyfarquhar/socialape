@@ -19,7 +19,7 @@ function decipherType(str: string) {
 }
 
 // ============ HANDLER FOR ERRORS =========== //
-export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
 	// CREATE PLACEHOLDER ERROR MESSAGE AND EMPTY JSON RESPONSE VARIABLE
 	const message = err.message || 'Something went wrong';
 	let jsonResponse;
@@ -100,9 +100,10 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
 	// USE ERROR LOGGER
 	logError(unknownError);
 	const error_type = unknownError.type,
-		res_message = unknownError.message;
-
+		res_message = unknownError.message,
+		res_errors = unknownError.errors;
+	// CREATE JSON RESPONSE
 	if (errors.length === 0) jsonResponse = { error_type, message: res_message };
-	else jsonResponse = { error_type, message: res_message, errors };
+	else jsonResponse = { error_type, message: res_message, res_errors };
 	return res.status(unknownError.code).json(jsonResponse);
 };
