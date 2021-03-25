@@ -70,6 +70,8 @@
  * @apiParam {String} confirmPassword Mandatory field to match password.
  * @apiParam {String} handle Mandatory unique user handle.
  *
+ * @apiSampleRequest off
+ *
  * @apiParamExample {json} Request-Example:
  *      {
  *          "email": "myexample@email.com",

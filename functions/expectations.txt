@@ -1,0 +1,91 @@
+AUTHORIZATION - must have token, token must be valid 
+SCREAM_EXISTS - if scream doesnt exist, 404 error 
+
+1. Register User ✅
+    x new user shows up in db & auth section, response token is sent back to client 
+    x handle taken error
+    x email taken error
+    x email must be valid
+    x password length error
+    x strings are trimmed
+    x passwords must match
+    x all fields required 
+
+2. Login User ✅
+    x user login receives response token
+    x strings are trimmed 
+    x user must be existing user 
+    x credentials must be correct 
+    x all fields required 
+
+3. Get Any User Info ✅
+    x gets full response data 
+    x handle must be valid user 
+
+4. Get Logged in User ✅
+    x gets full response data
+    x AUTHORIZATION
+    
+5. Put User Details ✅
+    x provided fields are updated in the DATABASE
+    x strings are trimmed
+    x AUTHORIZATION
+    x url must be valid 
+    x empty strings are OK, nothing required
+    x must include at least one of the user details fields
+
+6. Mark Notifications Read ✅
+    x all unread notifications become read in db, 200 "Notifications marked as read"
+    x AUTHORIZATION
+    x if all already read, 200 "All notifications already read"
+
+7. Update Photo ✅
+    x profile photo URL updated in 1) user's doc, 2) scream docs, 3) comment docs - 200 "Image uploaded"
+    x AUTHORIZATION
+    x if wrong content type (multipart/form-data), error
+    x if wrong mimetype (jpeg or png), error 
+    x if too large, error
+
+8. Get All Screams ✅
+    x 200 screams array including ids
+
+9. Get Scream by ID ✅
+    x 200 return scream data 
+    x SCREAM_EXISTS 
+
+10. Post new Scream ✅
+    x 201 new sream data including screamId
+    x AUTHORIZATION
+    x must have body
+    x string is trimmed 
+    x full scream is created 
+
+11. Post new Comment ✅
+    x 201 new comment data, comment count goes up on scream in db, creates notification for recipient
+    x AUTHORIZATION
+    x SCREAM_EXISTS 
+    x must have body
+    x string is trimmed
+    x comment is created
+
+12. Like Scream ✅
+    x 201 scream data and screamId returned, like count goes up in db, creates notification for recipient
+    x AUTHORIZATION
+    x SCREAM_EXISTS
+    x if already liked, api error 
+
+13. Unlike Scream ✅
+    x 200 scream data and screamId, likeCount goes down in db, removes notifications 
+    x AUTHORIZATION
+    x SCREAM_EXISTS 
+    x if scream not liked, error
+
+14. Delete Scream ✅
+    x 200 "Scream deleted" 
+        x delete all documents associated with scream:
+            x comments
+            x likes 
+            x notifications 
+    x AUTHORIZATION 
+    x SCREAM_EXISTS
+    x if user handle !== scream user handle, error

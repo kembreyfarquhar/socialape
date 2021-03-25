@@ -6,6 +6,8 @@ import { Errors } from '../errorService/auth.error';
 // IMPORT TYPES, DISABLE ESLINT TO AVOID ERRORS
 // eslint-disable-next-line no-unused-vars
 import { RequestHandler } from 'express';
+// eslint-disable-next-line no-unused-vars
+import { ApiErrorType } from '../types/apiError';
 
 // VALIDATE TOKEN MIDDLEWARE (FOR AUTHORIZATION ENDPOINTS)
 export const authorization: RequestHandler = async (req, _res, next) => {
@@ -13,8 +15,9 @@ export const authorization: RequestHandler = async (req, _res, next) => {
 		// GRAB TOKEN FROM AUTHORIZATION HEADER
 		const token = req.headers.authorization;
 		if (!token) {
-			const error = Errors.NO_TOKEN;
+			const error: ApiErrorType = Errors.NO_TOKEN;
 			next(new ApiError(error.code, error.message, error.type));
+			return;
 		}
 		// DECODE THE TOKEN
 		const decodedToken = await admin.auth().verifyIdToken(token as string);
@@ -32,12 +35,9 @@ export const authorization: RequestHandler = async (req, _res, next) => {
 		next();
 	} catch (err) {
 		// SEND BACK ERROR FOR FAILED AUTHORIZATION
-		if (err instanceof ApiError) next(err);
-		else {
-			const errors = [];
-			if (typeof err.code === 'string') errors.push(err.code);
-			const error = Errors.TOKEN_VERIFY_FAILURE;
-			next(new ApiError(error.code, error.message, error.type, errors));
-		}
+		const errors = [];
+		if (typeof err.code === 'string') errors.push(err.code);
+		const error: ApiErrorType = Errors.TOKEN_VERIFY_FAILURE;
+		next(new ApiError(error.code, error.message, error.type, errors));
 	}
 };

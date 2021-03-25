@@ -6,6 +6,8 @@ import * as Yup from 'yup';
 import { RequestHandler } from 'express';
 // eslint-disable-next-line no-unused-vars
 import { UserDetails, UserLogin, UserRegister } from '../types/user';
+import { UserErrors } from '../errorService/user.error';
+import { ApiError } from '../errorService/apiError';
 
 // USER REGISTRATION BODY SCHEMA
 function userRegistrationSchema() {
@@ -68,11 +70,12 @@ export const validateUserLogin: RequestHandler = async (req, _res, next) => {
 };
 
 // USER DETAILS BODY SCHEMA
+// ALL FIELDS OPTIONAL, USER MAY REMOVE TEXT FROM FIELD IF THEY WANT
 function userDetailsSchema() {
 	return Yup.object().shape({
-		bio: Yup.string().strict(false).trim().notRequired().default(''),
-		website: Yup.string().strict(false).trim().url().notRequired().default(''),
-		location: Yup.string().strict(false).trim().notRequired().default(''),
+		bio: Yup.string().strict(false).trim().notRequired(),
+		website: Yup.string().strict(false).trim().url().notRequired(),
+		location: Yup.string().strict(false).trim().notRequired(),
 	});
 }
 
@@ -80,11 +83,16 @@ function userDetailsSchema() {
 export const validateUserDetails: RequestHandler = async (req, _res, next) => {
 	try {
 		const { bio, website, location } = req.body;
+		if (!bio && !website && !location) {
+			const error = UserErrors.NO_USER_DETAILS;
+			next(new ApiError(error.code, error.message, error.type));
+			return;
+		}
 		const userDetailsToCheck = { bio, website, location };
 		// CAPTURE VALIDATED REQUEST BODY
 		const result = await userDetailsSchema().validate(userDetailsToCheck, { abortEarly: false });
 		// ENSURE THAT RESULT FITS THE USERDETAILS TYPE TO SEND VIA REQ.USERDETAILS
-		const userDetails: UserDetails = result;
+		const userDetails: Partial<UserDetails> = result;
 		req.userDetails = userDetails;
 		next();
 	} catch (err) {

@@ -11,6 +11,8 @@ import { ApiError } from '../errorService/apiError';
 import { RequestHandler } from 'express';
 // eslint-disable-next-line no-unused-vars
 import { DBScream } from '../types/scream';
+// eslint-disable-next-line no-unused-vars
+import { ScreamComment } from '../types/comment';
 
 // SCREAM BODY SCHEMA
 function screamSchema() {
@@ -32,7 +34,7 @@ export const validateScream: RequestHandler = async (req, _res, next) => {
 			createdAt = new Date().toISOString(),
 			userHandle = req.user.handle,
 			userImage = req.user.imageUrl;
-		// CONSTRUCT NEWSCREAM OBJECT THAT FITS NEWSCREAM TYPE TO SEND VIA REQ.SCREAM
+		// CONSTRUCT NEWSCREAM OBJECT THAT FITS DBSCREAM TYPE TO SEND VIA REQ.SCREAM
 		const newScream: DBScream = { body, userHandle, userImage, createdAt, commentCount, likeCount };
 		req.scream = newScream;
 		next();
@@ -41,28 +43,31 @@ export const validateScream: RequestHandler = async (req, _res, next) => {
 	}
 };
 
-export const validateComment: RequestHandler = (req, res, next) => {
-	const { body } = req.body;
-	const keys = Object.keys(req.body);
+// SCREAM COMMENT SCHEMA
+function commentSchema() {
+	return Yup.object().shape({
+		body: Yup.string().strict(false).trim().required(),
+	});
+}
 
-	if (!keys.length) {
-		res.status(400).json({ body: 'Must contain a json body' });
-	} else if (!body) {
-		res.status(400).json({ body: 'Must include comment body' });
-	} else {
-		if (typeof body !== 'string') {
-			res.status(400).json({ body: 'Body must be a string' });
-		} else if (!body) {
-			res.status(400).json({ body: 'Must not be empty' });
-		} else {
-			const userHandle = req.user.handle,
-				screamId = req.params.screamId,
-				createdAt = new Date().toISOString(),
-				userImage = req.user.imageUrl;
-			const newComment = { userHandle, screamId, createdAt, body, userImage };
-			req.comment = newComment;
-			next();
-		}
+// VALIDATE REQUEST BODY WITH SCREAM COMMMENT SCHEMA RULES
+// SEND VALIDATED VALUES VIA REQ.COMMENT OR CATCH ERR
+export const validateComment: RequestHandler = async (req, _res, next) => {
+	try {
+		const commentToCheck = { body: req.body.body };
+		// CAPTURE VALIDATED REQUEST BODY
+		const result = await commentSchema().validate(commentToCheck, { abortEarly: false });
+		const body = result.body,
+			screamId = req.params.screamId,
+			createdAt = new Date().toISOString(),
+			userImage = req.user.imageUrl,
+			userHandle = req.user.handle;
+		// CONSTRUCT NEW COMMENT OBJECT THAT FITS SCREAMCOMMENT TYPE TO SEND VIA REQ.NEWCOMMENT
+		const newComment: ScreamComment = { userHandle, screamId, createdAt, body, userImage };
+		req.comment = newComment;
+		next();
+	} catch (err) {
+		next(err);
 	}
 };
 

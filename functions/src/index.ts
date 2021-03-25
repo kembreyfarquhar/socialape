@@ -16,7 +16,7 @@ import {
 // eslint-disable-next-line no-unused-vars
 import { ScreamComment } from './types/comment';
 // eslint-disable-next-line no-unused-vars
-import { UserNotification } from './types/notification';
+import { DBNotification } from './types/notification';
 // eslint-disable-next-line no-unused-vars
 import { Scream } from './types/scream';
 
@@ -37,7 +37,7 @@ export const createNotificationOnLike = functions
 			// CHECK IF IT EXISTS AND THE HANDLE DIFFERS FROM THE SNAPSHOT (NO NOTIFICATION FOR LIKING YOUR OWN SCREAM)
 			if (screamDoc.exists && screamData.userHandle !== snapshot.data().userHandle) {
 				// CREATE USERNOTIFICATION OBJECT TO BE SET
-				const notification: UserNotification = {
+				const notification: DBNotification = {
 					createdAt: new Date().toISOString(),
 					recipient: screamData.userHandle,
 					sender: snapshot.data().userHandle,
@@ -83,7 +83,7 @@ export const createNotificationOnComment = functions
 			// (NO NOTIFICATION FOR COMMENTING ON YOUR OWN POST)
 			if (screamDoc.exists && commentData.userHandle !== screamData.userHandle) {
 				// CREATE USERNOTIFICATION OBJECT TO BE SET
-				const notification: UserNotification = {
+				const notification: DBNotification = {
 					createdAt: new Date().toISOString(),
 					recipient: screamData.userHandle,
 					sender: commentData.userHandle,

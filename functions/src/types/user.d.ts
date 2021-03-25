@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { ScreamLike } from './like';
 // eslint-disable-next-line no-unused-vars
-import { UserNotification } from './notification';
+import { NotificationData } from './notification';
 // eslint-disable-next-line no-unused-vars
 import { Scream } from './scream';
 // eslint-disable-next-line no-unused-vars
@@ -51,5 +51,5 @@ export type UserData = {
 export type AuthenticatedUserData = {
 	credentials: DBUser;
 	likes: ScreamLike[] | [];
-	notifications: UserNotification[] | [];
+	notifications: NotificationData[] | [];
 };

@@ -12,7 +12,7 @@ declare global {
 		export interface Request {
 			user: admin.auth.DecodedIdToken;
 			rawBody: any;
-			userDetails: UserDetails;
+			userDetails: Partial<UserDetails>;
 			comment: ScreamComment;
 			scream: DBScream;
 			screamDoc: FirebaseFirestore.DocumentSnapshot<FirebaseFirestore.DocumentData>;
