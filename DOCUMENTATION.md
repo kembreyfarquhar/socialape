@@ -1,6 +1,4 @@
-<style>
-summary {font-size: 1.3rem;}
-</style>
+<link rel="stylesheet" href="docs.css">
 
 <div id="top"></div>
 
