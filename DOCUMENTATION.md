@@ -7,6 +7,7 @@
 > A social media application using firebase functions.
 
 - [Users](#Users)
+  - <a href="#get-any-user" onclick="open('#get-any-user')">Get any User</a>
   - [Get any user](#get-any-user)
   - [Get Authenticated User Info](#get-authenticated-user-info)
   - [Login existing user](#login-existing-user)
@@ -27,8 +28,9 @@
 
 # **Users**
 
-<div id="get-any-user"></div>
-<details><summary>Get any user</summary>
+<details id="get-any-user">
+
+<summary>Get any user</summary>
 
 [Back to top](#top)
 
@@ -1674,3 +1676,10 @@ HTTP/1.1 403 FORBIDDEN
 ```
 
 </details>
+
+<script type="text/javascript">
+	const element = document.getElementById(id);
+	element.addEventListener("click", () => {
+    	element.open = true;
+	});
+</script>
