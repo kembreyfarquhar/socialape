@@ -7,11 +7,10 @@
 > A social media application using firebase functions.
 
 - [Users](#Users)
-  - <a href="#get-any-user" onclick="open('#get-any-user')">Get any User</a>
   - [Get any user](#get-any-user)
   - [Get Authenticated User Info](#get-authenticated-user-info)
   - [Login existing user](#login-existing-user)
-  - [Mark all unread notifications as read](#mark-all-unread-notifications-as-read)
+  - [Mark all unread notifications as read](#mark-all-notifications-as-read)
   - [Post user profile image](#post-user-profile-image)
   - [Register new user](#register-new-user)
   - [Update user details](#update-user-details)
@@ -128,8 +127,9 @@ HTTP/1.1 404 NOT FOUND
 
 </details>
 
-<div id="get-authenticated-user-info"></div>
-<details><summary>Get Authenticated User Info</summary>
+<details id="get-authenticated-user-info">
+
+<summary>Get Authenticated User Info</summary>
 
 [Back to top](#top)
 
@@ -249,8 +249,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="login-existing-user"></div>
-<details><summary>Login existing user</summary>
+<details id="login-existing-user">
+
+<summary>Login existing user</summary>
 
 [Back to top](#top)
 
@@ -356,8 +357,9 @@ HTTP/1.1 404 NOT FOUND
 
 </details>
 
-<div id="mark-all-notifications-as-read"></div>
-<details><summary>Mark all unread notifications as read</summary>
+<details id="mark-all-notifications-as-read">
+
+<summary>Mark all unread notifications as read</summary>
 
 [Back to top](#top)
 
@@ -439,8 +441,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="post-user-profile-image"></div>
-<details><summary>Post user profile image</summary>
+<details id="post-user-profile-image">
+
+<summary>Post user profile image</summary>
 
 [Back to top](#top)
 
@@ -567,8 +570,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="register-new-user"></div>
-<details><summary>Register new user</summary>
+<details id="register-new-user">
+
+<summary>Register new user</summary>
 
 [Back to top](#top)
 
@@ -701,8 +705,9 @@ HTTP/1.1 400 BAD REQUEST
 
 </details>
 
-<div id="update-user-details"></div>
-<details><summary>Update user details</summary>
+<details id="update-user-details">
+
+<summary>Update user details</summary>
 
 [Back to top](#top)
 
@@ -844,8 +849,9 @@ HTTP/1.1 403 FORBIDDEN
 
 # **Screams**
 
-<div id="delete-a-like-from-a-scream"></div>
-<details><summary>Delete a like from a Scream</summary>
+<details id="delete-a-like-from-a-scream">
+
+<summary>Delete a like from a Scream</summary>
 
 [Back to top](#top)
 
@@ -990,8 +996,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="delete-a-scream">
-<details><summary>Delete a Scream</summary>
+<details id="delete-a-scream">
+
+<summary>Delete a Scream</summary>
 
 [Back to top](#top)
 
@@ -1107,8 +1114,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="get-all-scream-documents"></div>
-<details><summary>Get all Scream Documents</summary>
+<details id="get-all-scream-documents">
+
+<summary>Get all Scream Documents</summary>
 
 [Back to top](#top)
 
@@ -1156,8 +1164,9 @@ HTTP/1.1 200 OK
 
 </details>
 
-<div id="get-scream-by-id"></div>
-<details><summary>Get scream by ID</summary>
+<details id="get-scream-by-id">
+
+<summary>Get scream by ID</summary>
 
 [Back to top](#top)
 
@@ -1229,8 +1238,9 @@ HTTP/1.1 404 NOT FOUND
 
 </details>
 
-<div id="post-a-like-on-a-scream"></div>
-<details><summary>Post a Like on a Scream</summary>
+<details id="post-a-like-on-a-scream">
+
+<summary>Post a Like on a Scream</summary>
 
 [Back to top](#top)
 
@@ -1375,8 +1385,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="post-new-comment"></div>
-<details><summary>Post new comment</summary>
+<details id="post-new-comment">
+
+<summary>Post new comment</summary>
 
 [Back to top](#top)
 
@@ -1538,8 +1549,9 @@ HTTP/1.1 403 FORBIDDEN
 
 </details>
 
-<div id="post-new-scream-document"></div>
-<details><summary>Post new Scream Document</summary>
+<details id="post-new-scream-document">
+
+<summary>Post new Scream Document</summary>
 
 [Back to top](#top)
 
@@ -1676,10 +1688,3 @@ HTTP/1.1 403 FORBIDDEN
 ```
 
 </details>
-
-<script type="text/javascript">
-	const element = document.getElementById(id);
-	element.addEventListener("click", () => {
-    	element.open = true;
-	});
-</script>
