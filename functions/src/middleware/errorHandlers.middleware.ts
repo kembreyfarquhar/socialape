@@ -22,7 +22,7 @@ function decipherType(str: string) {
 }
 
 // ========================== ERROR HANDLER FUNCTION ========================== //
-export const errorHandler: ErrorRequestHandler = (err, _req, res) => {
+export const errorHandler: ErrorRequestHandler = (err, _req, res, _) => {
 	// CREATE PLACEHOLDER ERROR MESSAGE AND EMPTY JSON RESPONSE VARIABLE
 	const message = err.message || 'Something went wrong';
 	let jsonResponse: JSONResponse;

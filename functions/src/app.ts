@@ -35,8 +35,8 @@ const app = express();
 // ===== INIT FIREBASE APP ========= //
 firebase.default.initializeApp(firebaseConfig);
 
-app.use(express.json());
 app.use(cors({ origin: true }));
+app.use(express.json());
 
 // ======== EXPORT VALUES ========= //
 export { admin };

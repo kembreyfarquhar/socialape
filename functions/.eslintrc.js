@@ -21,4 +21,7 @@ module.exports = {
 		'/lib/**/*', // Ignore built files.
 	],
 	plugins: ['@typescript-eslint', 'import', 'prettier'],
+	rules: {
+		'no-unused-vars': 0,
+	},
 };
